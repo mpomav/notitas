@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
@@ -6,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
 namespace Notitas
@@ -17,7 +19,11 @@ namespace Notitas
         private const string PinOff = "";
         private const string PinOn = "";
 
+        private static readonly TimeSpan RainbowWindow = TimeSpan.FromSeconds(30);
+
         private readonly App _app;
+        private readonly HashSet<string> _triedColors = new HashSet<string>();
+        private DateTime _firstTry;
         private IntPtr _hwnd;
 
         public Note Note { get; }
@@ -30,6 +36,7 @@ namespace Notitas
             InitializeComponent();
 
             Swatches.ItemsSource = Palette.All;
+            BodyBox.Tag = EasterEggs.BodyHint(DateTime.Now);
             Width = note.Width;
             Topmost = note.Topmost;
             ApplyColor();
@@ -158,6 +165,7 @@ namespace Notitas
             var collapsed = Note.Collapsed;
             Editor.Visibility = TagsHost.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
             CollapsedLabel.Visibility = collapsed ? Visibility.Visible : Visibility.Collapsed;
+            ApplyCat();
             if (collapsed)
             {
                 MinHeight = MaxHeight = Height = HeaderHeight;
@@ -174,6 +182,44 @@ namespace Notitas
         {
             while (TagsHost.Children.Count > 1) TagsHost.Children.RemoveAt(0);
             foreach (var tag in Note.Tags) TagsHost.Children.Insert(TagsHost.Children.Count - 1, MakeChip(tag));
+            ApplyCat();
+        }
+
+        private void ApplyCat()
+        {
+            Cat.Visibility = !Note.Collapsed && Note.Tags.Contains("gato") ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void CountColor(string key)
+        {
+            var now = DateTime.UtcNow;
+            if (_triedColors.Count == 0 || now - _firstTry > RainbowWindow)
+            {
+                _triedColors.Clear();
+                _firstTry = now;
+            }
+            _triedColors.Add(key);
+            if (_triedColors.Count < Palette.All.Count) return;
+            _triedColors.Clear();
+            ShowRainbow();
+        }
+
+        private void ShowRainbow()
+        {
+            var slide = new TranslateTransform();
+            var rainbow = new LinearGradientBrush
+            {
+                SpreadMethod = GradientSpreadMethod.Repeat,
+                RelativeTransform = slide,
+            };
+            for (var i = 0; i < Palette.All.Count; i++)
+                rainbow.GradientStops.Add(new GradientStop(Palette.All[i].Band.Color, (double)i / Palette.All.Count));
+            rainbow.GradientStops.Add(new GradientStop(Palette.All[0].Band.Color, 1));
+            Header.Background = rainbow;
+
+            var run = new DoubleAnimation(0, 1, TimeSpan.FromSeconds(1.5)) { RepeatBehavior = new RepeatBehavior(3) };
+            run.Completed += (s, e) => ApplyColor();
+            slide.BeginAnimation(TranslateTransform.XProperty, run);
         }
 
         private UIElement MakeChip(string tag)
@@ -249,6 +295,7 @@ namespace Notitas
         {
             Note.Color = ((NoteColor)((FrameworkElement)sender).DataContext).Key;
             MorePopup.IsOpen = false;
+            CountColor(Note.Color);
         }
 
         private void TitleBox_PreviewKeyDown(object sender, KeyEventArgs e)

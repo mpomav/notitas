@@ -109,6 +109,17 @@
                      LostKeyboardFocus="TagBox_LostFocus" />
         </WrapPanel>
 
+        <TextBlock x:Name="Cat"
+                   Grid.Row="2"
+                   Text="=^.^="
+                   FontSize="11"
+                   Opacity="0.45"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Bottom"
+                   Margin="0,0,11,7"
+                   IsHitTestVisible="False"
+                   Visibility="Collapsed" />
+
         <Popup x:Name="MorePopup"
                PlacementTarget="{Binding ElementName=MoreButton}"
                Placement="Bottom"

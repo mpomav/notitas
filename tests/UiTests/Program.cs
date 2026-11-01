@@ -236,8 +236,62 @@ namespace Notitas.Tests
             await Wait(100);
             Check("settings shows the notes folder", Find<TextBlock>(settings, "FolderLabel").Text, _app.Store.Folder);
             settings.Close();
+
+            // Easter eggs
+            var search = Find<TextBox>(panel, "SearchBox");
+            search.Text = "xyzzy";
+            await Wait(50);
+            Check("search reply when nothing matches", Find<TextBlock>(panel, "EmptyLabel").Text, "Nada ocurre.");
+            search.Text = "zzz-sin-resultados";
+            await Wait(50);
+            Check("plain empty message otherwise", Find<TextBlock>(panel, "EmptyLabel").Text, "Nada coincide con tu búsqueda");
+            search.Text = "";
+
+            var notesBefore = _app.Store.Notes.Count;
+            var confetti = Find<Canvas>(panel, "Confetti");
+            foreach (var key in new[] { Key.Up, Key.Up, Key.Up, Key.Down, Key.Down, Key.Left, Key.Right, Key.Left, Key.Right, Key.B }) Press(search, key);
+            Check("no confetti before the last key", confetti.Children.Count, 0);
+            Press(search, Key.A);
+            Check("konami throws confetti", confetti.Children.Count, 70);
+            await Wait(1200);
+            Shot(panel, "confetti.png");    // A capture leaves the panel marked unloaded, so shots wait until after the search checks.
+            await Wait(3000);
+            Check("confetti cleans up", confetti.Children.Count, 0);
+            Press(search, Key.B);
+            Press(search, Key.A);
+            Check("letters alone do nothing", confetti.Children.Count, 0);
+            Check("konami leaves notes alone", _app.Store.Notes.Count, notesBefore);
+
+            var open = WindowOf(note);    // Clearing the desktop earlier replaced the first window.
+            var cat = Find<TextBlock>(open, "Cat");
+            note.Collapsed = false;
+            await Wait(50);
+            Check("no cat by default", cat.Visibility, Visibility.Collapsed);
+            note.AddTag("gato");
+            Check("gato tag brings the cat", cat.Visibility, Visibility.Visible);
+            note.RemoveTag("gato");
+            Check("cat leaves with the tag", cat.Visibility, Visibility.Collapsed);
+
+            var swatch = typeof(NoteWindow).GetMethod("Swatch_Click", BindingFlags.NonPublic | BindingFlags.Instance);
+            var header = Find<Border>(open, "Header");
+            foreach (var color in Palette.All.Skip(1))
+                swatch.Invoke(open, new object[] { new Button { DataContext = color }, new RoutedEventArgs() });
+            Check("six colors aren't a rainbow", header.Background is LinearGradientBrush, false);
+            swatch.Invoke(open, new object[] { new Button { DataContext = Palette.All[0] }, new RoutedEventArgs() });
+            Check("all colors make a rainbow", header.Background is LinearGradientBrush, true);
+            await Wait(5000);
+            Check("rainbow fades back to the note color", header.Background, Palette.Get(note.Color).Band);
+
+            Check("quiet hours hint", EasterEggs.BodyHint(new DateTime(2026, 1, 1, 3, 0, 0)), "¿Sigues por aquí a esta hora?");
+            Check("daytime hint", EasterEggs.BodyHint(new DateTime(2026, 1, 1, 12, 0, 0)), "Escribe algo…");
+            note.AddTag("gato");
+            await Wait(100);
+            Shot(open, "cat.png");
+            note.RemoveTag("gato");
             Shot(panel, "panel.png");
             Shot(WindowOf(_app.Store.Notes.First(n => n.OnDesktop && !n.Collapsed)), "note.png");
+            note.Color = "mint";
+            note.Collapsed = true;
             panel.Hide();
         }
 

@@ -12,7 +12,7 @@
     <AssemblyName>Notitas</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\notitas.ico</ApplicationIcon>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Product>Notitas</Product>
     <Description>Notas adhesivas con tags para el escritorio</Description>
     <DebugType>none</DebugType>

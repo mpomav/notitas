@@ -167,5 +167,7 @@
                        Foreground="{StaticResource Muted}"
                        Visibility="Collapsed" />
         </Grid>
+
+        <Canvas x:Name="Confetti" Grid.ColumnSpan="2" IsHitTestVisible="False" ClipToBounds="True" />
     </Grid>
 </Window>

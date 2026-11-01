@@ -5,12 +5,19 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Shapes;
 
 namespace Notitas
 {
     public partial class PanelWindow : Window
     {
+        private const int ConfettiPieces = 70;
+
         private readonly App _app;
+        private readonly KonamiCode _konami = new KonamiCode();
+        private readonly Random _random = new Random();
         private string _tag;
 
         public PanelWindow(App app)
@@ -56,7 +63,7 @@ namespace Notitas
                 .ToList();
 
             Cards.ItemsSource = shown;
-            EmptyLabel.Text = EmptyMessage(trash, query.Length > 0 || _tag != null);
+            EmptyLabel.Text = EasterEggs.SearchReply(query) ?? EmptyMessage(trash, query.Length > 0 || _tag != null);
             EmptyLabel.Visibility = shown.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
 
@@ -126,10 +133,44 @@ namespace Notitas
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            var finished = _konami.Feed(e.Key);
+            if (finished) ThrowConfetti();
+            if (finished || _konami.HoldingLetters) e.Handled = true;
+
             if (e.Key != Key.Escape) return;
             if (SearchBox.Text.Length > 0) SearchBox.Clear();
             else Hide();
             e.Handled = true;
+        }
+
+        private void ThrowConfetti()
+        {
+            for (var i = 0; i < ConfettiPieces; i++)
+            {
+                var spin = new RotateTransform(_random.Next(360));
+                var piece = new Rectangle
+                {
+                    Width = 13,
+                    Height = 13,
+                    RadiusX = 2,
+                    RadiusY = 2,
+                    Fill = Palette.All[_random.Next(Palette.All.Count)].Band,
+                    RenderTransform = spin,
+                    RenderTransformOrigin = new Point(0.5, 0.5),
+                };
+                Canvas.SetLeft(piece, _random.NextDouble() * ActualWidth);
+                Confetti.Children.Add(piece);
+
+                var seconds = 1.6 + _random.NextDouble() * 1.4;
+                var fall = new DoubleAnimation(-20, ActualHeight + 20, TimeSpan.FromSeconds(seconds))
+                {
+                    BeginTime = TimeSpan.FromSeconds(_random.NextDouble() * 0.8),
+                };
+                fall.Completed += (s, e) => Confetti.Children.Remove(piece);
+                Canvas.SetTop(piece, -20);
+                piece.BeginAnimation(Canvas.TopProperty, fall);
+                spin.BeginAnimation(RotateTransform.AngleProperty, new DoubleAnimation(spin.Angle, spin.Angle + 540, TimeSpan.FromSeconds(seconds)));
+            }
         }
 
         private static Note NoteOf(object sender) => (Note)((FrameworkElement)sender).DataContext;
