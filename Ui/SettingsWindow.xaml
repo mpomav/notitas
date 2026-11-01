@@ -1,0 +1,56 @@
+<Window x:Class="Notitas.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Configuración de Notitas"
+        Icon="pack://application:,,,/Notitas;component/Assets/notitas.ico"
+        Width="500"
+        SizeToContent="Height"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource Canvas}"
+        FontFamily="{StaticResource TextFont}"
+        FontSize="13"
+        Foreground="{StaticResource Ink}"
+        UseLayoutRounding="True">
+
+    <StackPanel Margin="20,18,20,18">
+        <TextBlock Text="Carpeta de notas" FontWeight="SemiBold" Margin="0,0,0,4" />
+        <TextBlock Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,0,0,8"
+                   Text="Cada nota es un archivo Markdown. Para verlas en Obsidian, elige una carpeta dentro de tu bóveda: los tags y el texto aparecerán allí, y lo que edites en Obsidian vuelve a la nota." />
+        <Border Background="#FFFDF8" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="7" Padding="10,7" Margin="0,0,0,8">
+            <TextBlock x:Name="FolderLabel" TextTrimming="CharacterEllipsis" />
+        </Border>
+        <StackPanel Orientation="Horizontal">
+            <Button Style="{StaticResource GhostButton}" Content="Cambiar carpeta…" Margin="0,0,6,0" Click="Change_Click" />
+            <Button Style="{StaticResource GhostButton}" Content="Abrir carpeta" Margin="0,0,6,0" Click="Open_Click" />
+            <Button x:Name="ResetButton" Style="{StaticResource GhostButton}" Content="Volver a la carpeta portable" Click="Reset_Click" />
+        </StackPanel>
+
+        <TextBlock Text="Inicio" FontWeight="SemiBold" Margin="0,18,0,6" />
+        <CheckBox x:Name="AutostartBox" Content="Abrir Notitas al iniciar Windows" Click="Autostart_Click" />
+
+        <TextBlock Text="Atajos" FontWeight="SemiBold" Margin="0,18,0,6" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="110" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="22" />
+                <RowDefinition Height="22" />
+                <RowDefinition Height="22" />
+                <RowDefinition Height="22" />
+            </Grid.RowDefinitions>
+            <TextBlock Text="Ctrl+Alt+N" />
+            <TextBlock Grid.Column="1" Foreground="{StaticResource Muted}" Text="Nueva nota" />
+            <TextBlock Grid.Row="1" Text="Ctrl+Alt+K" />
+            <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{StaticResource Muted}" Text="Abrir el panel" />
+            <TextBlock Grid.Row="2" Text="Ctrl+Alt+F" />
+            <TextBlock Grid.Row="2" Grid.Column="1" Foreground="{StaticResource Muted}" Text="Traer las notas al frente" />
+            <TextBlock Grid.Row="3" Text="Ctrl+Alt+D" />
+            <TextBlock Grid.Row="3" Grid.Column="1" Foreground="{StaticResource Muted}" Text="Despejar el escritorio o devolver las notas" />
+        </Grid>
+
+        <Button Style="{StaticResource PrimaryButton}" Content="Listo" HorizontalAlignment="Right" Margin="0,16,0,0" Padding="18,6" IsDefault="True" IsCancel="True" Click="Done_Click" />
+    </StackPanel>
+</Window>

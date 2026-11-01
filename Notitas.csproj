@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <PlatformTarget>x64</PlatformTarget>
+    <RootNamespace>Notitas</RootNamespace>
+    <AssemblyName>Notitas</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\notitas.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
+    <Product>Notitas</Product>
+    <Description>Notas adhesivas con tags para el escritorio</Description>
+    <DebugType>none</DebugType>
+    <SatelliteResourceLanguages>es</SatelliteResourceLanguages>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="dist\**;tests\**" />
+    <Page Remove="dist\**;tests\**" />
+    <None Remove="dist\**;tests\**" />
+    <Resource Include="Assets\notitas.ico" />
+    <Reference Include="System.Runtime.Serialization" />
+  </ItemGroup>
+
+</Project>
